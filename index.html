@@ -1,15 +1,16 @@
-<!DOCTYPE html>
+# Код для генерации полноценного index.html со всеми фичами
+html_content = """<!DOCTYPE html>
 <html lang="ru">
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PROJECT: ENIGMA 35</title>
     <style>
-        /* Брутальный хакерский стиль (Никакого ИИ-глянца) */
         :root {
-            --bg-color: #0a0a0a;
+            --bg-color: #050505;
             --matrix-green: #00ff66;
             --error-red: #ff3333;
+            --terminal-blue: #00ccff;
             --font-family: 'Courier New', Courier, monospace;
         }
 
@@ -31,88 +32,106 @@
             min-height: 100vh;
             padding: 20px;
             overflow-x: hidden;
-            background-image: linear-gradient(rgba(0, 255, 102, 0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 255, 102, 0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-image: linear-gradient(rgba(0, 255, 102, 0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 255, 102, 0.02) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* Сканирующая полоса на экране */
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 9999;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .lang-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid var(--matrix-green);
+            color: var(--matrix-green);
+            padding: 5px 10px;
+            font-family: var(--font-family);
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .lang-switcher:hover {
+            background: var(--matrix-green);
+            color: var(--bg-color);
         }
 
         .container {
             max-width: 800px;
             width: 100%;
             text-align: center;
-            border: 3px solid var(--matrix-green);
+            border: 2px solid var(--matrix-green);
             padding: 40px 20px;
-            background: rgba(10, 10, 10, 0.95);
-            box-shadow: 10px 10px 0px var(--matrix-green);
+            background: rgba(5, 5, 5, 0.95);
+            box-shadow: 8px 8px 0px var(--matrix-green);
             position: relative;
-        }
-
-        /* Эффект шума/помех */
-        .container::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
+            transition: all 0.5s ease;
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-size: 2.3rem;
             text-transform: uppercase;
-            letter-spacing: 5px;
+            letter-spacing: 4px;
             margin-bottom: 20px;
-            text-shadow: 0 0 10px var(--matrix-green);
+            text-shadow: 0 0 8px var(--matrix-green);
         }
 
         .mission-text {
-            font-size: 1.1rem;
+            font-size: 1rem;
             line-height: 1.6;
             margin-bottom: 30px;
-            color: #ffffff;
+            color: #e0e0e0;
             border-bottom: 1px dashed var(--matrix-green);
             padding-bottom: 20px;
         }
 
-        /* Таймер обратного отсчета */
         #timer {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: bold;
-            margin: 20px 0;
-            letter-spacing: 2px;
+            margin: 15px 0;
+            letter-spacing: 3px;
             color: #ffffff;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
-        /* Блок с персональной буквой */
         .fragment-box {
-            border: 2px dashed var(--matrix-green);
-            padding: 20px;
+            border: 1px dashed var(--matrix-green);
+            padding: 25px;
             margin: 30px 0;
-            background: rgba(0, 255, 102, 0.05);
-        }
-
-        .fragment-box h3 {
-            font-size: 1rem;
-            margin-bottom: 10px;
-            text-transform: uppercase;
+            background: rgba(0, 255, 102, 0.03);
+            position: relative;
         }
 
         #user-fragment {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: bold;
-            animation: blink 1s infinite alternate;
+            animation: blink 1.2s infinite alternate;
+            color: #ffffff;
+            text-shadow: 0 0 15px var(--matrix-green);
         }
 
-        /* Форма ввода финального шифра */
         .input-group {
             margin-top: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 15px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            letter-spacing: 1px;
         }
 
         input[type="text"] {
@@ -123,8 +142,8 @@
             font-family: var(--font-family);
             font-size: 1.2rem;
             text-align: center;
-            width: 80%;
-            max-width: 400px;
+            width: 85%;
+            max-width: 450px;
             text-transform: uppercase;
             outline: none;
         }
@@ -133,19 +152,19 @@
             box-shadow: 0 0 15px var(--matrix-green);
         }
 
-        button {
+        button.action-btn {
             background: var(--matrix-green);
             color: var(--bg-color);
             border: none;
-            padding: 12px 30px;
+            padding: 14px 35px;
             font-family: var(--font-family);
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             text-transform: uppercase;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
 
-        button:hover {
+        button.action-btn:hover {
             background: #ffffff;
             box-shadow: 0 0 15px #ffffff;
             transform: translateY(-2px);
@@ -155,77 +174,226 @@
             margin-top: 20px;
             font-weight: bold;
             font-size: 1.1rem;
+            min-height: 24px;
         }
 
         .error { color: var(--error-red); text-shadow: 0 0 5px var(--error-red); }
         .success { color: var(--matrix-green); text-shadow: 0 0 5px var(--matrix-green); }
 
+        /* --- СТИЛИ ДЛЯ ВТОРОГО ЭТАПА --- */
+        .hidden { display: none !important; }
+        
+        .stage2-container {
+            border-color: var(--terminal-blue);
+            box-shadow: 8px 8px 0px var(--terminal-blue);
+            color: var(--terminal-blue);
+        }
+
+        .ascii-meme {
+            font-size: 8px;
+            line-height: 8px;
+            white-space: pre;
+            margin: 25px auto;
+            display: inline-block;
+            text-align: left;
+            font-family: monospace;
+            color: var(--terminal-blue);
+            text-shadow: 0 0 3px rgba(0,204,255,0.5);
+        }
+
+        .stage2-input {
+            border-color: var(--terminal-blue) !important;
+            color: var(--terminal-blue) !important;
+        }
+
+        /* --- СТИЛИ ДЛЯ ФИНАЛЬНОЙ ПОБЕДЫ --- */
+        .victory-container {
+            border-color: #fff;
+            box-shadow: 0 0 30px #fff;
+            color: #fff;
+            background: #000;
+        }
+
         @keyframes blink {
-            from { opacity: 1; text-shadow: 0 0 20px var(--matrix-green); }
-            to { opacity: 0.4; text-shadow: 0 0 2px var(--matrix-green); }
+            from { opacity: 1; }
+            to { opacity: 0.3; }
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
-            #timer { font-size: 2rem; }
-            #user-fragment { font-size: 2.5rem; }
+            h1 { font-size: 1.6rem; }
+            #timer { font-size: 2.2rem; }
+            #user-fragment { font-size: 2.8rem; }
+            .ascii-meme { font-size: 4px; line-height: 4px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>PROJECT: ENIGMA 35</h1>
+    <button class="lang-switcher" onclick="toggleLanguage()">[ EN ]</button>
+
+    <div class="container" id="stage1">
+        <h1 id="s1-title">PROJECT: ENIGMA 35</h1>
         
-        <p class="mission-text">
+        <p class="mission-text" id="s1-desc">
             Один человек не способен разгадать это. Истина разделена между всеми жителями Земли. 
             У тебя есть только один фрагмент. У твоих друзей — другие. Объединяйтесь в сообщества, 
             делитесь фрагментами и введите финальный ключ до того, как таймер обнулится.
         </p>
 
-        <div>ВРЕМЯ ДО ИСХОДА:</div>
+        <div id="s1-timer-label">ВРЕМЯ ДО ИСХОДА / TIME REMAINING:</div>
         <div id="timer">35:00:00:00</div>
 
         <div class="fragment-box">
-            <h3>Ваш уникальный фрагмент пазла:</h3>
+            <h3 id="s1-frag-label">Ваш уникальный фрагмент пазла:</h3>
             <div id="user-fragment">LOADING...</div>
-            <p style="font-size: 0.8rem; margin-top: 10px; color: #aaa;">
+            <p style="font-size: 0.8rem; margin-top: 10px; color: #888;" id="s1-frag-note">
                 (Этот фрагмент закреплен за вашим браузером. Передайте его остальным)
             </p>
         </div>
 
         <div class="input-group">
-            <label for="solution">ВВЕДИТЕ НАЙДЕННЫЙ МИРОВОЙ КЛЮЧ:</label>
-            <input type="text" id="solution" placeholder="КОД ЗДЕСЬ..." autocomplete="off">
-            <button onclick="checkSolution()">Проверить ключ</button>
+            <label for="solution" id="s1-input-label">ВВЕДИТЕ НАЙДЕННЫЙ МИРОВОЙ КЛЮЧ:</label>
+            <input type="text" id="solution" placeholder="..." autocomplete="off">
+            <button class="action-btn" onclick="checkStage1()" id="s1-btn">Проверить ключ</button>
             <div id="result-message"></div>
         </div>
     </div>
 
-    <script>
-        // --- НАСТРОЙКИ ИГРЫ ---
-        // Секретная фраза, которую должны угадать (в верхнем регистре)
-        const SECRET_ANSWER = "HTML CSS JAVASCRIPT 2026"; 
+    <div class="container stage2-container hidden" id="stage2">
+        <h1 id="s2-title">SYSTEM COMPROMISED / ЭТАП 2</h1>
+        <p id="s2-desc">Поздравляем! Первый уровень защиты пал. Вы доказали силу коллективного разума. Но это было лишь предисловие. Создатель системы одобряет ваши действия.</p>
         
-        // Набор символов, которые раздаются пользователям (твоя секретная фраза + случайный мусор, чтобы запутать)
-        const FRAGMENTS_POOL = ["H-1", "T-2", "M-3", "L-4", "C-5", "S-6", "S-7", "J-8", "A-9", "V-10", "S-11", "R-12", "I-13", "P-14", "T-15", "2-16", "0-17", "2-18", "6-19", "X-99", "Z-44"];
+        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 15px auto; display:block;">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M8 11h8M10 14h4"/>
+            <circle cx="9" cy="8" r="1"/>
+            <circle cx="15" cy="8" r="1"/>
+        </svg>
 
-        // Установка даты окончания (ровно через 35 дней от ПЕРВОГО запуска сайта или фиксированная дата)
-        // Для теста поставим дату: текущее время + 35 дней. 
-        let targetDate = localStorage.getItem('enigma_target_date');
-        if (!targetDate) {
-            targetDate = new Date().getTime() + (35 * 24 * 60 * 60 * 1000);
-            localStorage.setItem('enigma_target_date', targetDate);
+        <div class="ascii-meme">
+ ░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒░░░░░░░░░░░░
+ ░░░░░░░░░▒▒▓▓████████████▓▓▒░░░░░░
+ ░░░░░░▒▓████████████████████▓▒░░░░
+ ░░░░▒██████████████████████████▒░░
+ ░░░▒██████████▀▀▀▀▀▀▀▀▀█████████░░
+ ░░░████████▀              ▀██████░
+ ░░▒███████                  █████▒
+ ░░███████░   ▀▀▄      ▄▀▀   ░█████
+ ░░███████    ▄▄▄      ▄▄▄    █████
+ ░░███████▄    ▀        ▀    ▄█████
+ ░░░████████▄    ▄▄▄▄      ▄██████░
+ ░░░░▒█████████▄   ▀▀   ▄███████▒░░
+ ░░░░░░▒▓█████████▄▄▄▄███████▓▒░░░░
+ ░░░░░░   ░▒▓████████████▓▒░   ░░░░
+        LEVEL 2: FIND THE PASSCODE IN THE MATRIX
+        </div>
+
+        <p style="font-size: 0.9rem; font-style: italic;" id="s2-hint">Подсказка: Разработчик оставил лазейку прямо внутри этой страницы. Загляни «под капот» (Исходный код), найди скрытый параметр 'SECRET_BACKDOOR' и введи его сюда.</p>
+
+        <div class="input-group">
+            <input type="text" id="stage2-input" class="stage2-input" placeholder="ACCESS_CODE..." autocomplete="off">
+            <button class="action-btn" style="background: var(--terminal-blue);" onclick="checkStage2()" id="s2-btn">Взломать терминал</button>
+            <div id="stage2-message"></div>
+        </div>
+    </div>
+
+    <div class="container victory-container hidden" id="stage3">
+        <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#00ff66" stroke-width="1.5" style="margin:0 auto 20px; display:block;">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <h1 id="s3-title">SYSTEM UNLOCKED</h1>
+        <p id="s3-desc" style="font-size: 1.2rem; line-height: 1.8;">Вы полностью прошли Enigma 35! Вы нашли скрытый код бэкдора в архивах страницы. Настоящий хакер видит структуру насквозь. Ожидайте Глобального Обновления Сети в следующем цикле...</p>
+    </div>
+
+    <script>
+        // --- 🤫 СЕКРЕТНЫЙ БЭКДОР ДЛЯ ЭТАПА 2 (Игроки должны найти его в коде страницы через F12!) ---
+        const SECRET_BACKDOOR = "NEO_WAS_HERE_2026";
+
+        // --- НАСТРОЙКИ ИГРЫ ---
+        const SECRET_ANSWER = "THE TRUTH IS HIDDEN IN PLAIN SIGHT"; 
+        
+        // Массив уникальных фрагментов для раздачи игрокам (Собрано из букв ответа + координаты и фейки)
+        const FRAGMENTS_POOL = [
+            "T-1", "H-2", "E-3", "T-4", "R-5", "U-6", "T-7", "H-8", 
+            "I-9", "S-10", "H-11", "I-12", "D-13", "D-14", "E-15", "N-16",
+            "I-17", "N-18", "P-19", "L-20", "A-21", "I-22", "N-23",
+            "S-24", "H-25", "G-26", "H-27", "T-28", "FAKE_X9", "ERROR_404"
+        ];
+
+        // --- СЛОВАРЬ ПЕРЕВОДОВ ---
+        let currentLang = 'RU';
+        const translations = {
+            RU: {
+                s1Title: "PROJECT: ENIGMA 35",
+                s1Desc: "Один человек не способен разгадать это. Истина разделена между всеми жителями Земли. У тебя есть только один фрагмент. У твоих друзей — другие. Объединяйтесь в сообщества, делитесь фрагментами и введите финальный ключ до того, как таймер обнулится.",
+                s1TimerLabel: "ВРЕМЯ ДО ИСХОДА:",
+                s1FragLabel: "Ваш уникальный фрагмент пазла:",
+                s1FragNote: "(Этот фрагмент закреплен за вашим браузером. Передайте его остальным)",
+                s1InputLabel: "ВВЕДИТЕ НАЙДЕННЫЙ МИРОВОЙ КЛЮЧ:",
+                s1Btn: "Проверить ключ",
+                errWrong: "ОШИБКА: НЕВЕРНЫЙ КЛЮЧ. СИСТЕМА ЗАБЛОКИРОВАНА.",
+                s2Title: "СИСТЕМА СКОМПРОМЕТИРОВАНА / ЭТАП 2",
+                s2Desc: "Поздравляем! Первый уровень защиты пал. Вы доказали силу коллективного разума. Но это было лишь предисловие. Теперь проверим твои личные навыки.",
+                s2Hint: "Подсказка: Разработчик оставил лазейку прямо внутри этой страницы. Загляни «под капот» (Исходный код через F12), найди скрытую переменную 'SECRET_BACKDOOR' и введи её значение сюда.",
+                s2Btn: "Взломать терминал",
+                s3Title: "ДОСТУП ПОЛУЧЕН",
+                s3Desc: "Вы полностью прошли Enigma 35! Вы успешно нашли скрытый бэкдор в коде страницы. Настоящий хакер видит структуру насквозь. Ожидайте Глобального Обновления Сети в следующем цикле..."
+            },
+            EN: {
+                s1Title: "PROJECT: ENIGMA 35",
+                s1Desc: "One person cannot solve this alone. The truth is divided among all inhabitants of Earth. You hold only one fragment. Your friends have others. Unite into communities, share your clues, and input the final key before the timer hits zero.",
+                s1TimerLabel: "TIME REMAINING:",
+                s1FragLabel: "Your unique puzzle fragment:",
+                s1FragNote: "(This fragment is locked to your browser. Share it with others)",
+                s1InputLabel: "ENTER THE GLOBAL KEY:",
+                s1Btn: "Verify Key",
+                errWrong: "ERROR: INVALID KEY. ACCESS DENIED.",
+                s2Title: "SYSTEM COMPROMISED / STAGE 2",
+                s2Desc: "Congratulations! The first layer of defense has fallen. You have proven the power of collective intelligence. But that was just a prologue.",
+                s2Hint: "Hint: The developer left a backdoor right inside this page. Look 'under the hood' (View Source Code via F12), find the hidden variable 'SECRET_BACKDOOR' and type it here.",
+                s2Btn: "Bypass Terminal",
+                s3Title: "SYSTEM UNLOCKED",
+                s3Desc: "You have completely bypassed Enigma 35! You successfully extracted the hidden backdoor key from the web archive. A true hacker looks straight into the matrix. Awaiting Global Network Update in the next cycle..."
+            }
+        };
+
+        // ТУГГЛ ПЕРЕВОДА
+        function toggleLanguage() {
+            currentLang = currentLang === 'RU' ? 'EN' : 'RU';
+            document.querySelector('.lang-switcher').innerText = `[ ${currentLang === 'RU' ? 'EN' : 'RU'} ]`;
+            
+            const t = translations[currentLang];
+            document.getElementById('s1-title').innerText = t.s1Title;
+            document.getElementById('s1-desc').innerText = t.s1Desc;
+            document.getElementById('s1-timer-label').innerText = t.s1TimerLabel;
+            document.getElementById('s1-frag-label').innerText = t.s1FragLabel;
+            document.getElementById('s1-frag-note').innerText = t.s1FragNote;
+            document.getElementById('s1-input-label').innerText = t.s1InputLabel;
+            document.getElementById('s1-btn').innerText = t.s1Btn;
+            
+            document.getElementById('s2-title').innerText = t.s2Title;
+            document.getElementById('s2-desc').innerText = t.s2Desc;
+            document.getElementById('s2-hint').innerText = t.s2Hint;
+            document.getElementById('s2-btn').innerText = t.s2Btn;
+            
+            document.getElementById('s3-title').innerText = t.s3Title;
+            document.getElementById('s3-desc').innerText = t.s3Desc;
         }
 
         // --- ЛОГИКА ТАЙМЕРА ---
+        let targetDate = localStorage.getItem('enigma_target_date_v2');
+        if (!targetDate) {
+            targetDate = new Date().getTime() + (35 * 24 * 60 * 60 * 1000);
+            localStorage.setItem('enigma_target_date_v2', targetDate);
+        }
+
         function updateTimer() {
             const now = new Date().getTime();
             const difference = targetDate - now;
 
             if (difference <= 0) {
                 document.getElementById('timer').innerText = "00:00:00:00";
-                document.getElementById('timer').classList.add('error');
                 clearInterval(timerInterval);
                 return;
             }
@@ -235,7 +403,6 @@
             const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-            // Форматирование (добавление нулей, если число меньше 10)
             const d = days < 10 ? '0' + days : days;
             const h = hours < 10 ? '0' + hours : hours;
             const m = minutes < 10 ? '0' + minutes : minutes;
@@ -246,30 +413,56 @@
         const timerInterval = setInterval(updateTimer, 1000);
         updateTimer();
 
-        // --- ВЫДАЧА УНИКАЛЬНОГО ФРАГМЕНТА ---
-        let userFragment = localStorage.getItem('enigma_user_fragment');
+        // --- ВЫДАЧА ФРАГМЕНТА ---
+        let userFragment = localStorage.getItem('enigma_user_fragment_v2');
         if (!userFragment) {
-            // Выбираем случайный фрагмент из пула
             const randomIndex = Math.floor(Math.random() * FRAGMENTS_POOL.length);
             userFragment = FRAGMENTS_POOL[randomIndex];
-            localStorage.setItem('enigma_user_fragment', userFragment);
+            localStorage.setItem('enigma_user_fragment_v2', userFragment);
         }
         document.getElementById('user-fragment').innerText = userFragment;
 
-        // --- ПРОВЕРКА ОТВЕТА ---
-        function checkSolution() {
+        // --- ПРОВЕРКА ЭТАПА 1 ---
+        function checkStage1() {
             const input = document.getElementById('solution').value.trim().toUpperCase();
             const messageElement = document.getElementById('result-message');
 
             if (input === SECRET_ANSWER) {
                 messageElement.className = "success";
-                messageElement.innerHTML = "ДОСТУП РАЗРЕШЕН. МИР СПАСЕН. <br> СЛЕДУЮЩИЙ ЭТАП СКОРО...";
-                // Тут можно перенаправить на секретную страницу или запустить салют
+                messageElement.innerText = "ACCESS GRANTED.";
+                
+                // Переход на этап 2 с анимацией задержки
+                setTimeout(() => {
+                    document.getElementById('stage1').classList.add('hidden');
+                    document.getElementById('stage2').classList.remove('hidden');
+                    document.body.style.setProperty('--matrix-green', 'var(--terminal-blue)');
+                }, 1000);
             } else {
                 messageElement.className = "error";
-                messageElement.innerText = "ОШИБКА: НЕВЕРНЫЙ КЛЮЧ. ПОПРОБУЙТЕ СНОВА.";
+                messageElement.innerText = translations[currentLang].errWrong;
+            }
+        }
+
+        // --- ПРОВЕРКА ЭТАПА 2 ---
+        function checkStage2() {
+            const input = document.getElementById('stage2-input').value.trim();
+            const messageElement = document.getElementById('stage2-message');
+
+            if (input === SECRET_BACKDOOR) {
+                document.getElementById('stage2').classList.add('hidden');
+                document.getElementById('stage3').classList.remove('hidden');
+                document.body.style.setProperty('--matrix-green', '#ffffff');
+            } else {
+                messageElement.className = "error";
+                messageElement.innerText = currentLang === 'RU' ? "КОД СБОЯ. ДОСТУП ПРЕСЕЧЕН." : "DECRYPTION FAILED. ACCESS DENIED.";
             }
         }
     </script>
 </body>
 </html>
+"""
+
+# Сохраняем код в файл для скачивания пользователем
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+print("File successfully created.")
