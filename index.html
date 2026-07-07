@@ -57,7 +57,6 @@
             overflow-x: hidden;
         }
 
-        /* Глобальное исправление для всех кнопок: убираем синюю обводку фокуса */
         button:focus, input:focus {
             outline: none !important;
         }
@@ -400,7 +399,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyB0LATt74Wk1ci368pkDsjg4K6M2O-3xcI",
             authDomain: "enigma-35.firebaseapp.com",
@@ -417,7 +415,6 @@
             db = firebase.database();
         }
 
-        // SHA-256 HASH FUNCTION
         async function sha256(message) {
             const msgBuffer = new TextEncoder().encode(message);                    
             const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -425,11 +422,10 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // Скрытая через Base64 структура букв. Для F12 это просто набор символов.
         const FRAGMENT_CHARS = JSON.parse(atob("eyIxIjoiVCIsIjIiOiJIIiwiMyI6IkUiLCI0IjoiTSIsIjUiOiJBIiwiNiI6IlQiLCI3IjoiUiIsIjgiOiJJIiwiOSI6IlgiLCIxMCI6IkgiLCIxMSI6IkEiLCIxMiI6IlMiLCIxMyI6IlkiLCIxNCI6Ik8iLCIxNSI6IlUifQ=="));
 
-        const HASH_ANSWER = "b8de97f4752f353ae8f18bc20afff94c16fec87a230d14aead8572287c2f196c";    // THEMATRIXHASYOU
-        const HASH_BACKDOOR = "c4c369b370cbe591ba7021523ebf3848d4b4eeb5b386036363a53d6dac5edd7f";  // ENCRYPTEDCORERECOVERY
+        const HASH_ANSWER = "b8de97f4752f353ae8f18bc20afff94c16fec87a230d14aead8572287c2f196c";   
+        const HASH_BACKDOOR = "c4c369b370cbe591ba7021523ebf3848d4b4eeb5b386036363a53d6dac5edd7f"; 
 
         let currentLang = localStorage.getItem('enigma_lang_v7') || 'en';
         let isGlobalAlertActive = false;
