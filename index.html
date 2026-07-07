@@ -38,6 +38,37 @@
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
+            position: relative;
+        }
+
+        /* Language Switcher Styles */
+        .lang-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        .lang-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-muted);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-btn.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: rgba(102, 252, 241, 0.05);
+        }
+        .lang-btn:hover:not(.active) {
+            border-color: rgba(255, 255, 255, 0.5);
+            color: var(--text-main);
         }
 
         .container {
@@ -46,6 +77,7 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.05);
             margin-bottom: 25px;
+            margin-top: 40px;
         }
 
         h1 { font-size: 2rem; font-weight: 800; letter-spacing: 2px; margin-bottom: 15px; }
@@ -83,8 +115,8 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 30px;
         }
 
-        .input-group { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-        .input-group label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+        .input-group { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+        .input-group label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); text-align: center; }
         
         input[type="text"] {
             background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
@@ -99,7 +131,7 @@
         }
         button.action-btn:hover { background: #ffffff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); }
 
-        .feedback-msg { font-weight: 600; font-size: 0.85rem; min-height: 18px; margin-top: 5px; }
+        .feedback-msg { font-weight: 600; font-size: 0.85rem; min-height: 18px; margin-top: 5px; text-align: center; width: 100%; }
         .error { color: var(--error-red); }
         .success { color: var(--accent-color); }
         .hidden { display: none !important; }
@@ -161,9 +193,15 @@
 </head>
 <body>
 
+    <!-- Переключатель языков -->
+    <div class="lang-switcher">
+        <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">EN</button>
+        <button class="lang-btn" id="btn-ru" onclick="setLanguage('ru')">RU</button>
+    </div>
+
     <div class="container" id="stage1">
         <h1>PROJECT:<br>ENIGMA 35</h1>
-        <p class="mission-text">
+        <p class="mission-text" id="text-mission">
             One person cannot solve this alone. The truth is divided among all inhabitants of Earth. 
             Unite, share your pieces. The progress counter will only tick up when you manually input other players' fragments.
         </p>
@@ -171,35 +209,35 @@
         <div class="stats-grid">
             <div class="stat-box">
                 <div class="stat-val" id="live-online">1</div>
-                <div class="stat-lbl">ONLINE NOW</div>
+                <div class="stat-lbl" id="lbl-online">ONLINE NOW</div>
             </div>
             <div class="stat-box">
                 <div class="stat-val" id="live-progress">0 / 28</div>
-                <div class="stat-lbl">FRAGMENTS FOUND</div>
+                <div class="stat-lbl" id="lbl-progress">FRAGMENTS FOUND</div>
             </div>
         </div>
 
-        <div class="timer-label">TIME REMAINING</div>
+        <div class="timer-label" id="lbl-timer">TIME REMAINING</div>
         <div id="timer">35:00:00:00</div>
 
         <div class="fragment-box">
-            <h3>Your unique puzzle fragment:</h3>
+            <h3 id="lbl-your-fragment">Your unique puzzle fragment:</h3>
             <div id="user-fragment">LOADING...</div>
-            <button class="share-btn" onclick="openShareModal()">Share Project</button>
+            <button class="share-btn" id="btn-share" onclick="openShareModal()">Share Project</button>
         </div>
 
         <div class="input-sections-container">
             <div class="input-group">
-                <label for="fragment-input">SUBMIT A FOUND PUZZLE FRAGMENT (e.g., T-1):</label>
+                <label for="fragment-input" id="lbl-input-frag">SUBMIT A FOUND PUZZLE FRAGMENT (e.g., T-1):</label>
                 <input type="text" id="fragment-input" placeholder="X-00" autocomplete="off">
-                <button class="action-btn" onclick="submitFragment()">Submit Piece</button>
+                <button class="action-btn" id="btn-submit-frag" onclick="submitFragment()">Submit Piece</button>
                 <div id="frag-message" class="feedback-msg"></div>
             </div>
 
             <div class="input-group">
-                <label for="solution">ENTER THE GLOBAL KEY:</label>
+                <label for="solution" id="lbl-input-key">ENTER THE GLOBAL KEY:</label>
                 <input type="text" id="solution" placeholder="..." autocomplete="off">
-                <button class="action-btn" onclick="checkStage1()">Verify Key</button>
+                <button class="action-btn" id="btn-submit-key" onclick="checkStage1()">Verify Key</button>
                 <div id="result-message" class="feedback-msg"></div>
             </div>
         </div>
@@ -212,8 +250,8 @@
     </div>
 
     <div class="container hidden" id="stage2">
-        <h2>STAGE 2 / LEVEL 2</h2>
-        <p class="mission-text">Congratulations! The first layer of defense has fallen. You have proven the power of collective intelligence.</p>
+        <h2 id="lbl-stage2-title">STAGE 2 / LEVEL 2</h2>
+        <p class="mission-text" id="text-stage2-mission">Congratulations! The first layer of defense has fallen. You have proven the power of collective intelligence.</p>
         
         <div class="ascii-meme">
                  .--------.
@@ -231,33 +269,33 @@
         LEVEL 2: FIND THE PASSCODE IN THE MATRIX
         </div>
 
-        <p style="font-size: 0.85rem; font-style: italic; color: var(--text-muted); margin-bottom: 25px;">Look 'under the hood' (F12), find 'SECRET_BACKDOOR' and type it here.</p>
+        <p style="font-size: 0.85rem; font-style: italic; color: var(--text-muted); margin-bottom: 25px;" id="text-stage2-hint">Look 'under the hood' (F12), find 'SECRET_BACKDOOR' and type it here.</p>
 
         <div class="input-group">
             <input type="text" id="stage2-input" placeholder="ACCESS_CODE..." autocomplete="off">
-            <button class="action-btn" onclick="checkStage2()">Bypass Terminal</button>
-            <div id="stage2-message"></div>
+            <button class="action-btn" id="btn-stage2-submit" onclick="checkStage2()">Bypass Terminal</button>
+            <div id="stage2-message" class="feedback-msg"></div>
         </div>
     </div>
 
     <div class="container hidden" id="stage3">
-        <h2>SYSTEM UNLOCKED</h2>
-        <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-muted);">You have completely bypassed Enigma 35! Awaiting Global Network Update in the next cycle...</p>
+        <h2 id="lbl-stage3-title">SYSTEM UNLOCKED</h2>
+        <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-muted);" id="text-stage3-mission">You have completely bypassed Enigma 35! Awaiting Global Network Update in the next cycle...</p>
     </div>
 
     <div class="footer">
         PROJECT: ENIGMA 35 &copy; 2026<br> | <a href="https://github.com/misha12333211-ctrl/Enigma-35" target="_blank" style="opacity: 0.5; font-size: 0.75rem;">[ Source Code ]</a><br>
-        <span>For any questions/feedback contact:</span> <a href="mailto:fatago78@gmail.com">fatago78@gmail.com</a>
+        <span id="lbl-footer-contact">For any questions/feedback contact:</span> <a href="mailto:fatago78@gmail.com">fatago78@gmail.com</a>
     </div>
 
     <div class="modal-overlay" id="share-modal" onclick="closeShareModal(event)">
         <div class="modal" onclick="event.stopPropagation()">
-            <h2>SHARE DATA</h2>
+            <h2 id="lbl-modal-title">SHARE DATA</h2>
             <div id="qrcode"></div>
             <div class="modal-buttons">
-                <button class="modal-btn" onclick="copyOnlyLink()">Copy Website URL</button>
-                <button class="modal-btn" onclick="copyFullCipher()">Copy URL + My Fragment</button>
-                <button class="modal-btn close-modal" onclick="closeShareModal(null)">Close</button>
+                <button class="modal-btn" id="btn-modal-link" onclick="copyOnlyLink()">Copy Website URL</button>
+                <button class="modal-btn" id="btn-modal-full" onclick="copyFullCipher()">Copy URL + My Fragment</button>
+                <button class="modal-btn close-modal" id="btn-modal-close" onclick="closeShareModal(null)">Close</button>
             </div>
             <div id="modal-toast"></div>
         </div>
@@ -294,6 +332,128 @@
             "S-24", "H-25", "G-26", "H-27", "T-28"
         ];
 
+        // --- MULTILANGUAGE DICTIONARY ---
+        let currentLang = localStorage.getItem('enigma_lang') || 'en';
+        
+        const translations = {
+            en: {
+                mission: "One person cannot solve this alone. The truth is divided among all inhabitants of Earth. Unite, share your pieces. The progress counter will only tick up when you manually input other players' fragments.",
+                online: "ONLINE NOW",
+                progress: "FRAGMENTS FOUND",
+                timerLbl: "TIME REMAINING",
+                yourFrag: "Your unique puzzle fragment:",
+                shareBtn: "Share Project",
+                inputFragLbl: "SUBMIT A FOUND PUZZLE FRAGMENT (e.g., T-1):",
+                submitFragBtn: "Submit Piece",
+                inputKeyLbl: "ENTER THE GLOBAL KEY:",
+                verifyKeyBtn: "Verify Key",
+                likeBtn: "Like project",
+                likedBtn: "Liked!",
+                footerContact: "For any questions/feedback contact:",
+                modalTitle: "SHARE DATA",
+                modalLinkBtn: "Copy Website URL",
+                modalFullBtn: "Copy URL + My Fragment",
+                modalCloseBtn: "Close",
+                errNotExist: "ERROR: This fragment code does not exist.",
+                errAlready: "NOTICE: This fragment has already been registered.",
+                errOwn: "ERROR: You cannot activate your own code.",
+                successFrag: "SUCCESS: New puzzle piece locked into the global matrix!",
+                successFragOffline: "SUCCESS: New puzzle piece locked! (Offline Mode)",
+                toastUrl: "URL copied!",
+                toastFull: "Cipher data copied!",
+                stage1Success: "ACCESS GRANTED.",
+                stage1Error: "ERROR: INVALID KEY. ACCESS DENIED.",
+                stage2Title: "STAGE 2 / LEVEL 2",
+                stage2Mission: "Congratulations! The first layer of defense has fallen. You have proven the power of collective intelligence.",
+                stage2Hint: "Look 'under the hood' (F12), find 'SECRET_BACKDOOR' and type it here.",
+                stage2Btn: "Bypass Terminal",
+                stage2Error: "DECRYPTION FAILED. ACCESS DENIED.",
+                stage3Title: "SYSTEM UNLOCKED",
+                stage3Mission: "You have completely bypassed Enigma 35! Awaiting Global Network Update in the next cycle...",
+                shareTextTemplate: (frag, url) => `[PROJECT: ENIGMA 35]\n🌍 My cipher fragment: { ${frag} }\n🔑 Input it here to decrypt the system matrix: ${url}`
+            },
+            ru: {
+                mission: "Один человек принципиально не сможет пройти этот квест. Истина разделена между жителями Земли. Объединяйтесь и делитесь своими частями. Глобальный счётчик прогресса сдвинется с места только тогда, когда Вы будете вручную вводить коды, полученные от других участников.",
+                online: "СЕЙЧАС В СЕТИ",
+                progress: "НАЙДЕНО ФРАГМЕНТОВ",
+                timerLbl: "ВРЕМЕНИ ОСТАЛОСЬ",
+                yourFrag: "Ваш уникальный фрагмент шифра:",
+                shareBtn: "Поделиться проектом",
+                inputFragLbl: "ЗАРЕГИСТРИРОВАТЬ КОД ДРУГОГО УЧАСТНИКА (например, T-1):",
+                submitFragBtn: "Проверить фрагмент",
+                inputKeyLbl: "ВВЕСТИ ГЛОБАЛЬНЫЙ КЛЮЧ:",
+                verifyKeyBtn: "Проверить ключ",
+                likeBtn: "Поддержать проект",
+                likedBtn: "Оценено!",
+                footerContact: "По вопросам и предложениям:",
+                modalTitle: "ПОДЕЛИТЬСЯ ДАННЫМИ",
+                modalLinkBtn: "Скопировать ссылку на сайт",
+                modalFullBtn: "Скопировать ссылку + Мой фрагмент",
+                modalCloseBtn: "Закрыть",
+                errNotExist: "ОШИБКА: Такого кода не существует в системе.",
+                errAlready: "УВЕДОМЛЕНИЕ: Этот фрагмент уже был зарегистрирован ранее.",
+                errOwn: "ОШИБКА: Вы не можете активировать свой собственный фрагмент.",
+                successFrag: "УСПЕХ: Новый фрагмент успешно встроен в глобальную матрицу!",
+                successFragOffline: "УСПЕХ: Фрагмент зафиксирован! (Оффлайн-режим)",
+                toastUrl: "Ссылка успешно скопирована!",
+                toastFull: "Данные шифра скопированы в буфер обмена!",
+                stage1Success: "ДОСТУП РАЗРЕШЕН.",
+                stage1Error: "ОШИБКА: НЕВЕРНЫЙ КЛЮЧ. В ДОСТУПЕ ОТКАЗАНО.",
+                stage2Title: "ЭТАП 2 / УРОВЕНЬ 2",
+                stage2Mission: "Поздравляем! Первый рубеж обороны пройден. Вы доказали силу коллективного разума.",
+                stage2Hint: "Загляните «под капот» (F12), найдите переменную 'SECRET_BACKDOOR' и введите её значение здесь.",
+                stage2Btn: "Взломать терминал",
+                stage2Error: "СБОЙ ДЕШИФРОВАНИЯ. В ДОСТУПЕ ОТКАЗАНО.",
+                stage3Title: "СИСТЕМА РАЗБЛОКИРОВАНА",
+                stage3Mission: "Вы полностью взломали систему Enigma 35! Ожидайте обновления глобальной сети в следующем цикле...",
+                shareTextTemplate: (frag, url) => `[PROJECT: ENIGMA 35]\n🌍 Мой фрагмент шифра: { ${frag} }\n🔑 Введите его на сайте для дешифровки системы: ${url}`
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('enigma_lang', lang);
+            
+            // Toggle active buttons
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            
+            // Update Text Contents
+            const t = translations[lang];
+            document.getElementById('text-mission').innerText = t.mission;
+            document.getElementById('lbl-online').innerText = t.online;
+            document.getElementById('lbl-progress').innerText = t.progress;
+            document.getElementById('lbl-timer').innerText = t.timerLbl;
+            document.getElementById('lbl-your-fragment').innerText = t.yourFrag;
+            document.getElementById('btn-share').innerText = t.shareBtn;
+            document.getElementById('lbl-input-frag').innerText = t.inputFragLbl;
+            document.getElementById('btn-submit-frag').innerText = t.submitFragBtn;
+            document.getElementById('lbl-input-key').innerText = t.inputKeyLbl;
+            document.getElementById('btn-submit-key').innerText = t.verifyKeyBtn;
+            document.getElementById('lbl-footer-contact').innerText = t.footerContact;
+            document.getElementById('lbl-modal-title').innerText = t.modalTitle;
+            document.getElementById('btn-modal-link').innerText = t.modalLinkBtn;
+            document.getElementById('btn-modal-full').innerText = t.modalFullBtn;
+            document.getElementById('btn-modal-close').innerText = t.modalCloseBtn;
+            
+            // Stage 2 & 3 update
+            document.getElementById('lbl-stage2-title').innerText = t.stage2Title;
+            document.getElementById('text-stage2-mission').innerText = t.stage2Mission;
+            document.getElementById('text-stage2-hint').innerText = t.stage2Hint;
+            document.getElementById('btn-stage2-submit').innerText = t.stage2Btn;
+            document.getElementById('lbl-stage3-title').innerText = t.stage3Title;
+            document.getElementById('text-stage3-mission').innerText = t.stage3Mission;
+
+            // Update like button text dynamically
+            const isLiked = localStorage.getItem('enigma_liked_v5');
+            document.getElementById('like-btn-text').innerText = isLiked ? t.likedBtn : t.likeBtn;
+            
+            // Clear inputs feedback text to match updated language context
+            document.getElementById('frag-message').innerText = "";
+            document.getElementById('result-message').innerText = "";
+            document.getElementById('stage2-message').innerText = "";
+        }
+
         // --- UNIQUE FRAGMENT ASSIGNMENT ---
         let userFragment = localStorage.getItem('enigma_user_fragment_v5');
         if (!userFragment) {
@@ -303,14 +463,24 @@
         }
         document.getElementById('user-fragment').innerText = userFragment;
 
+        // Init language layout
+        setLanguage(currentLang);
+
         function submitFragment() {
             const inputField = document.getElementById('fragment-input');
             const msgBlock = document.getElementById('frag-message');
             const value = inputField.value.trim().toUpperCase();
+            const t = translations[currentLang];
 
             if (!FRAGMENTS_POOL.includes(value)) {
                 msgBlock.className = "feedback-msg error";
-                msgBlock.innerText = "ERROR: This fragment code does not exist.";
+                msgBlock.innerText = t.errNotExist;
+                return;
+            }
+
+            if (value === userFragment) {
+                msgBlock.className = "feedback-msg error";
+                msgBlock.innerText = t.errOwn;
                 return;
             }
 
@@ -319,24 +489,25 @@
                 ref.once('value', (snapshot) => {
                     if (snapshot.exists()) {
                         msgBlock.className = "feedback-msg error";
-                        msgBlock.innerText = "NOTICE: This fragment has already been registered.";
+                        msgBlock.innerText = t.errAlready;
                     } else {
                         ref.set(true).then(() => {
                             msgBlock.className = "feedback-msg success";
-                            msgBlock.innerText = "SUCCESS: New puzzle piece locked into the global matrix!";
+                            msgBlock.innerText = t.successFrag;
                             inputField.value = "";
                         });
                     }
                 });
             } else {
                 msgBlock.className = "feedback-msg success";
-                msgBlock.innerText = "SUCCESS: New puzzle piece locked! (Offline Mode)";
+                msgBlock.innerText = t.successFragOffline;
             }
         }
 
         // --- LIKES LOGIC ---
         function handleLike() {
             const btn = document.getElementById('like-button');
+            const t = translations[currentLang];
             if (localStorage.getItem('enigma_liked_v5')) return; 
 
             if (db) {
@@ -346,12 +517,13 @@
                 }, () => {
                     localStorage.setItem('enigma_liked_v5', 'true');
                     btn.classList.add('liked');
-                    document.getElementById('like-btn-text').innerText = "Liked!";
+                    document.getElementById('like-btn-text').innerText = t.likedBtn;
                 });
             } else {
                 localStorage.setItem('enigma_liked_v5', 'true');
                 btn.classList.add('liked');
                 document.getElementById('like-count').innerText = "1";
+                document.getElementById('like-btn-text').innerText = t.likedBtn;
             }
         }
 
@@ -371,17 +543,20 @@
             }
         }
         function closeShareModal(e) { document.getElementById('share-modal').classList.remove('active'); }
+        
         function showModalToast(text, status) {
             const toast = document.getElementById('modal-toast');
             toast.innerText = text; toast.className = status;
             setTimeout(() => { toast.innerText = ""; }, 3000);
         }
         function copyOnlyLink() {
-            navigator.clipboard.writeText(window.location.href).then(() => { showModalToast("URL copied!", "success"); });
+            const t = translations[currentLang];
+            navigator.clipboard.writeText(window.location.href).then(() => { showModalToast(t.toastUrl, "success"); });
         }
         function copyFullCipher() {
-            const shareText = `[PROJECT: ENIGMA 35]\n🌍 My cipher fragment: { ${userFragment} }\n🔑 Input it here to decrypt the system matrix: ${window.location.href}`;
-            navigator.clipboard.writeText(shareText).then(() => { showModalToast("Cipher data copied!", "success"); });
+            const t = translations[currentLang];
+            const shareText = t.shareTextTemplate(userFragment, window.location.href);
+            navigator.clipboard.writeText(shareText).then(() => { showModalToast(t.toastFull, "success"); });
         }
 
         // --- FIREBASE REALTIME SYNC ---
@@ -408,7 +583,6 @@
 
         if (localStorage.getItem('enigma_liked_v5')) {
             document.getElementById('like-button').classList.add('liked');
-            document.getElementById('like-btn-text').innerText = "Liked!";
         }
 
         // --- TIMER ---
@@ -430,25 +604,27 @@
 
         // --- VALIDATION KEYS ---
         function checkStage1() {
+            const t = translations[currentLang];
             if (document.getElementById('solution').value.trim().toUpperCase() === SECRET_ANSWER) {
                 document.getElementById('result-message').className = "feedback-msg success";
-                document.getElementById('result-message').innerText = "ACCESS GRANTED.";
+                document.getElementById('result-message').innerText = t.stage1Success;
                 setTimeout(() => {
                     document.getElementById('stage1').classList.add('hidden');
                     document.getElementById('stage2').classList.remove('hidden');
                 }, 1000);
             } else {
                 document.getElementById('result-message').className = "feedback-msg error";
-                document.getElementById('result-message').innerText = "ERROR: INVALID KEY. ACCESS DENIED.";
+                document.getElementById('result-message').innerText = t.stage1Error;
             }
         }
         function checkStage2() {
+            const t = translations[currentLang];
             if (document.getElementById('stage2-input').value.trim() === SECRET_BACKDOOR) {
                 document.getElementById('stage2').classList.add('hidden');
                 document.getElementById('stage3').classList.remove('hidden');
             } else {
                 document.getElementById('stage2-message').className = "feedback-msg error";
-                document.getElementById('stage2-message').innerText = "DECRYPTION FAILED. ACCESS DENIED.";
+                document.getElementById('stage2-message').innerText = t.stage2Error;
             }
         }
     </script>
