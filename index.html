@@ -368,12 +368,16 @@
             <button class="action-btn" id="btn-stage2-submit" onclick="checkStage2()">Bypass Terminal</button>
             <div id="stage2-message" class="feedback-msg"></div>
         </div>
+
+        <button class="share-btn" style="margin-top: 30px; border-color: var(--text-muted); color: var(--text-muted);" onclick="changeStage(1)">« Назад / Back</button>
     </div>
 
     <div class="container hidden" id="stage3" style="opacity: 0;">
         <h2 id="lbl-stage3-title">SYSTEM UNLOCKED</h2>
         <p style="font-size: 1.05rem; line-height: 1.8; color: var(--text-muted);" id="text-stage3-mission">You have completely bypassed Enigma 35! Awaiting Global Network Update in the next cycle...</p>
         <div class="coming-soon-badge" id="badge-coming-soon">STAGE 3: COMING SOON</div>
+        <br>
+        <button class="share-btn" style="margin-top: 30px; border-color: var(--text-muted); color: var(--text-muted);" onclick="changeStage(2)">« Назад / Back</button>
     </div>
 
     <div class="footer">
@@ -596,7 +600,7 @@
             }
 
             const inputChar = parts[0];
-            const inputId = parts[1]; // оставляем как строку, так как в JSON ключи строковые
+            const inputId = parts[1]; 
 
             if (!FRAGMENT_CHARS[inputId] || FRAGMENT_CHARS[inputId] !== inputChar) {
                 msgBlock.className = "feedback-msg error";
@@ -681,7 +685,6 @@
             navigator.clipboard.writeText(shareText).then(() => { showModalToast(t.toastFull, "success"); });
         }
 
-        // --- FIREBASE SYNC ---
         if(db) {
             const onlineRef = db.ref('.info/connected');
             const myPresenceRef = db.ref('presence/').push();
@@ -720,8 +723,6 @@
         if (localStorage.getItem('enigma_liked_v7')) {
             document.getElementById('like-button').classList.add('liked');
         }
-
-        // --- TIMER ---
         let targetDate = localStorage.getItem('enigma_target_date_v7');
         if (!targetDate) {
             targetDate = new Date().getTime() + (35 * 24 * 60 * 60 * 1000);
@@ -738,7 +739,41 @@
         }
         setInterval(updateTimer, 1000); updateTimer();
 
-        // --- CHECK KEYS ---
+
+        function changeStage(stageNum, instant = false) {
+            const stages = ['stage1', 'stage2', 'stage3'];
+            const targetId = 'stage' + stageNum;
+
+            if (instant) {
+                stages.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (id === targetId) {
+                        el.classList.remove('hidden');
+                        el.style.opacity = '1';
+                    } else {
+                        el.classList.add('hidden');
+                        el.style.opacity = '0';
+                    }
+                });
+            } else {
+                stages.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el.classList.contains('hidden') && id !== targetId) {
+                        el.style.opacity = '0';
+                        setTimeout(() => {
+                            el.classList.add('hidden');
+                            
+                            const targetEl = document.getElementById(targetId);
+                            targetEl.classList.remove('hidden');
+                            setTimeout(() => { targetEl.style.opacity = '1'; }, 50);
+                        }, 400);
+                    }
+                });
+            }
+            localStorage.setItem('enigma_reached_stage_v7', stageNum);
+        }
+
+
         async function checkStage1() {
             const t = translations[currentLang];
             const userInput = document.getElementById('solution').value.replace(/\s+/g, '').toUpperCase();
@@ -748,14 +783,7 @@
                 document.getElementById('result-message').className = "feedback-msg success";
                 document.getElementById('result-message').innerText = t.stage1Success;
                 setTimeout(() => {
-                    const s1 = document.getElementById('stage1');
-                    s1.style.opacity = '0';
-                    setTimeout(() => {
-                        s1.classList.add('hidden');
-                        const s2 = document.getElementById('stage2');
-                        s2.classList.remove('hidden');
-                        setTimeout(() => { s2.style.opacity = '1'; }, 50);
-                    }, 400);
+                    changeStage(2); 
                 }, 1000);
             } else {
                 document.getElementById('result-message').className = "feedback-msg error";
@@ -769,18 +797,16 @@
             const userHash = await sha256(userInput);
 
             if (userHash === HASH_BACKDOOR) {
-                const s2 = document.getElementById('stage2');
-                s2.style.opacity = '0';
-                setTimeout(() => {
-                    s2.classList.add('hidden');
-                    const s3 = document.getElementById('stage3');
-                    s3.classList.remove('hidden');
-                    setTimeout(() => { s3.style.opacity = '1'; }, 50);
-                }, 400);
+                changeStage(3);
             } else {
                 document.getElementById('stage2-message').className = "feedback-msg error";
                 document.getElementById('stage2-message').innerText = t.stage2Error;
             }
+        }
+
+        const savedStage = localStorage.getItem('enigma_reached_stage_v7');
+        if (savedStage && savedStage !== '1') {
+            changeStage(parseInt(savedStage), true); 
         }
     </script>
 </body>
